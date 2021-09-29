@@ -85,6 +85,7 @@ class renderer extends plugin_renderer_base {
                 $qa->get_behaviour()->adjust_display_options($displayoptions);
             }
 
+            $displayoptions->manualcomment = \question_display_options::VISIBLE;
             $output .= $qoutput->question($qa, $behaviouroutput, $qtoutput, $displayoptions, $questionnumber);
         }
 
@@ -188,6 +189,10 @@ class renderer extends plugin_renderer_base {
                 'questionattemptsumtable' => $quizrenderer->review_summary_table($sumdata, 0),
                 'questionattemptcontent' => $this->render_question_attempt_content($attemptobj)
         ];
+
+        $templatecontext['questionattemptheader'] = '';
+        $templatecontext['questionattemptsumtable'] = $this->review_summary_table($sumdata, 0);
+
         $isgecko = \core_useragent::is_gecko();
         // We need to use specific layout for Gecko because it does not fully support display flex and table.
         if ($isgecko) {
@@ -197,12 +202,38 @@ class renderer extends plugin_renderer_base {
         }
     }
 
+    public function review_summary_table($summarydata, $page) {
+        global $OUTPUT;
+        $logo = html_writer::img($OUTPUT->get_compact_logo_url(), '');
+
+        $output = '';
+        $output .= html_writer::start_tag('table', array(
+                'class' => 'generaltable generalbox quizreviewsummary'));
+        $output .= html_writer::start_tag('tbody');
+
+
+            $output .= html_writer::tag('tr',
+                    html_writer::tag('th', $logo)
+                    . html_writer::tag('th',
+                            html_writer::div(fullname($summarydata['user']['title']->user))
+                            . html_writer::div($summarydata['useremail']['content'])
+                            . html_writer::div($summarydata['startedon']['content'])
+                            , array('class' => 'cell'))
+            );
+
+        $output .= html_writer::end_tag('tbody');
+        $output .= html_writer::end_tag('table');
+        return $output;
+    }
+
     /**
      * Render page navigation
      *
      * @return string HTML string
      */
     public function render_attempt_navigation(): string {
+        return '';
+
         $output = '';
 
         $output .= html_writer::start_div('clearfix', ['id' => 'page-navbar']);
